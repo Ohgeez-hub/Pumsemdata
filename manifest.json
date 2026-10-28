@@ -3,28 +3,24 @@
   "schema": 1,
   "name": "건설공사 표준품셈",
   "edition": "2026",
-  "version": "2026.10.27",
-  "updated": "2026-10-27",
+  "version": "2026.10.28",
+  "updated": "2026-10-28",
   "source": {
     "origin": "https://gitlab.aigov.go.kr/archimin/pumsem",
     "note": "최초 자료 출처(2026-10-27 등록). 이후 이 저장소에서 직접 관리"
   },
-  "publish": {
-    "manifest_url": "https://raw.githubusercontent.com/Ohgeez-hub/Pumsemdata/main/manifest.json",
-    "data_url": "https://raw.githubusercontent.com/Ohgeez-hub/Pumsemdata/main/data/pyojunpumsem.json"
-  },
   "files": [
     {
       "path": "data/pyojunpumsem.json",
-      "sha256": "8c5f1bafc3d83e9b9b296530f12c5e767b038f5bc4d0b7899219ab6b316e0cfd",
-      "bytes": 4046806,
-      "entries": 1092,
-      "tables": 2328,
+      "sha256": "e964458c0583d4e99d7497e2d57bd0f4a19b02a6184dfd092a6b7038f2fb5a0f",
+      "bytes": 4050819,
+      "entries": 1096,
+      "tables": 2329,
       "divisions": {
         "공통부문": 321,
-        "토목부문": 233,
+        "토목부문": 236,
         "건축부문": 162,
-        "기계설비부문": 241,
+        "기계설비부문": 242,
         "유지관리부문": 135
       }
     }
