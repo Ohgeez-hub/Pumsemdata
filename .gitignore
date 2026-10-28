@@ -1,4 +1,4 @@
-# 동기화 작업이 Pull Request 설명으로만 쓰는 임시 파일
-sync_report.md
 __pycache__/
 *.pyc
+# 자료를 바꾸기 전에 직접 남겨 두는 사본
+*.bak

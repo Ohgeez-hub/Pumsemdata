@@ -4,6 +4,7 @@
     python tools/pumsem_check.py --update        # 자료에 맞게 manifest.json 을 다시 씀(판 번호는 그대로)
     python tools/pumsem_check.py --update --version 2027.1 --edition 2027
     python tools/pumsem_check.py --diff 이전.json  # 항목 단위 변경 내역
+    python tools/pumsem_check.py --auto          # 자료갱신.bat 이 쓰는 방식: 검사 → 판 번호 자동 → CHANGELOG 기록
 
 검사 내용
   - JSON 목록이고 항목마다 b, cn, ct, sc, st, ic, it, pg, bl, tx 가 알맞은 형식인지
@@ -16,13 +17,19 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
-from datetime import date
+import urllib.request
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "pyojunpumsem.json"
 MANIFEST = ROOT / "manifest.json"
+CHANGELOG = ROOT / "CHANGELOG.md"
+# GitHub 에 올라가 있는(= 지난 판) 자료. 변경 내역 비교에 쓴다.
+PUBLISHED_DATA_URL = "https://raw.githubusercontent.com/Ohgeez-hub/Pumsemdata/main/data/pyojunpumsem.json"
+KST = timezone(timedelta(hours=9))
 
 FIELDS = {"b": str, "cn": str, "ct": str, "sc": str, "st": str, "ic": str, "it": str, "pg": int, "bl": list,
           "tx": str}
@@ -164,12 +171,62 @@ def diff_text(d: dict, limit=60) -> str:
     return "\n".join(lines)
 
 
+def guess_edition(entries) -> str:
+    """제목의 "('26년 보완)" 중 가장 최근 연도 → '2026'."""
+    years = [int(y) for e in entries for y in re.findall(r"[’'‘](\d\d)년", e.get("it", ""))]
+    recent = [y for y in years if y < 90]
+    return f"20{max(recent):02d}" if recent else ""
+
+
+def next_version(old: str, today: str) -> str:
+    """오늘 날짜 판 번호. 같은 날 두 번째면 2026.10.28.2 처럼 붙인다."""
+    old = old or ""
+    if not old.startswith(today):
+        return today
+    tail = old[len(today):].lstrip(".")
+    return f"{today}.{int(tail) + 1 if tail.isdigit() else 2}"
+
+
+def fetch_published(url=PUBLISHED_DATA_URL, timeout=60):
+    """GitHub 에 올라가 있는 지난 판 자료(없거나 인터넷이 안 되면 None)."""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Pumsemdata-check"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode("utf-8-sig"))
+    except Exception:
+        return None
+
+
+def auto_update(raw: bytes, entries, old: dict | None, prev_entries=None, today: str | None = None) -> str:
+    """자료가 바뀌었으면 manifest 와 CHANGELOG 를 갱신하고 결과 문장을 돌려준다."""
+    if old and old.get("files") and old["files"][0].get("sha256") == sha256(raw):
+        return f"변경 없음 — manifest(판 {old.get('version')})가 이미 이 자료와 맞습니다."
+    today = today or datetime.now(KST).strftime("%Y.%m.%d")
+    version = next_version((old or {}).get("version", ""), today)
+    edition = guess_edition(entries) or (old or {}).get("edition", "")
+    man = build_manifest(raw, entries, old, version, edition)
+    MANIFEST.write_text(json.dumps(man, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if prev_entries is not None:
+        changes = diff_text(diff(prev_entries, entries), limit=200)
+    else:
+        changes = "- (지난 판과 비교하지 못함: 인터넷 연결 또는 GitHub 접속 확인)"
+    entry = (f"## {version}  ({len(entries):,}개 항목, 품셈 {edition or '?'}년)\n\n{changes}\n")
+    # 맨 위 제목 줄 바로 아래에 새 판을 넣는다(최신이 위)
+    old_log = CHANGELOG.read_text(encoding="utf-8") if CHANGELOG.exists() else "# 변경 내역\n"
+    head, _, rest = old_log.partition("\n")
+    rest = rest.strip("\n")
+    CHANGELOG.write_text(head + "\n\n" + entry + ("\n" + rest + "\n" if rest else ""), encoding="utf-8")
+    return f"manifest.json 갱신: 판 {version} (품셈 {edition}년)\n" + changes
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="표준품셈 자료 검사")
     ap.add_argument("--update", action="store_true", help="manifest.json 을 자료에 맞게 다시 씀")
     ap.add_argument("--version", help="판 번호 (예: 2027.1)")
     ap.add_argument("--edition", help="품셈 연도 (예: 2027)")
     ap.add_argument("--diff", metavar="OLD_JSON", help="이전 자료와 항목 단위 비교")
+    ap.add_argument("--auto", action="store_true",
+                    help="검사 → (바뀌었으면) 오늘 날짜 판 번호로 manifest 갱신 → GitHub 의 지난 판과 비교해 CHANGELOG 기록")
     a = ap.parse_args(argv)
     try:
         raw, entries = load(DATA)
@@ -180,6 +237,13 @@ def main(argv=None) -> int:
         for w in warnings[:20]:
             print("  경고:", w)
         old = json.loads(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else None
+        if a.auto:
+            prev = None
+            if not (old and old.get("files") and old["files"][0].get("sha256") == sha256(raw)):
+                print("GitHub 에 올라가 있는 지난 판과 비교하는 중…")
+                prev = fetch_published()
+            print(auto_update(raw, entries, old, prev))
+            return 0
         if a.update:
             man = build_manifest(raw, entries, old, a.version, a.edition)
             MANIFEST.write_text(json.dumps(man, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -6,11 +6,12 @@
   "version": "2026.10.27",
   "updated": "2026-10-27",
   "source": {
-    "url": "https://gitlab.aigov.go.kr/archimin/pumsem",
-    "file": "pyojunpumsem.json",
-    "branch": "main",
-    "fetched": "2026-10-27T17:09:00+09:00",
-    "note": "GitLab 에서 zip 으로 내려받아 처음 등록"
+    "origin": "https://gitlab.aigov.go.kr/archimin/pumsem",
+    "note": "최초 자료 출처(2026-10-27 등록). 이후 이 저장소에서 직접 관리"
+  },
+  "publish": {
+    "manifest_url": "https://raw.githubusercontent.com/Ohgeez-hub/Pumsemdata/main/manifest.json",
+    "data_url": "https://raw.githubusercontent.com/Ohgeez-hub/Pumsemdata/main/data/pyojunpumsem.json"
   },
   "files": [
     {
