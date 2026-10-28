@@ -1,7 +1,7 @@
 # Pumsemdata — 건설공사 표준품셈 데이터
 
 건설공사 표준품셈을 JSON으로 정리한 자료를 **이 저장소에서 직접 관리**하고,
-**적산도우미** 프로그램이 여기서 최신 자료를 받아 쓰도록 하는 저장소입니다.
+**JS헬퍼 (JS Helper, 옛 이름 적산도우미)** 프로그램이 여기서 최신 자료를 받아 쓰도록 하는 저장소입니다.
 
 ## 자료 현황
 
@@ -19,7 +19,7 @@
 
 ## 프로그램에서 쓰는 주소
 
-적산도우미는 먼저 작은 `manifest.json` 을 읽고, 판 번호(`version`)·검사값(`sha256`)이 바뀌었을 때만 자료를 받습니다.
+JS헬퍼는 먼저 작은 `manifest.json` 을 읽고, 판 번호(`version`)·검사값(`sha256`)이 바뀌었을 때만 자료를 받습니다.
 받은 자료는 검사값·항목 수가 manifest 와 같을 때만 사용합니다.
 
 ```
@@ -31,7 +31,7 @@ https://raw.githubusercontent.com/Ohgeez-hub/Pumsemdata/main/data/pyojunpumsem.j
 
 1. `data\pyojunpumsem.json` 을 새 파일로 덮어쓰거나 직접 고칩니다.
    (바꾸기 전에 `pyojunpumsem.json.bak` 처럼 사본을 남겨 두면 안전합니다. `.bak` 파일은 GitHub에 올라가지 않습니다.)
-2. 폴더의 **`자료갱신.bat`** 을 두 번 클릭합니다. (Python 필요 — 적산도우미 실행에 쓰는 것과 같음)
+2. 폴더의 **`자료갱신.bat`** 을 두 번 클릭합니다. (Python 필요 — JS헬퍼 실행에 쓰는 것과 같음)
    - 형식 검사: 실패하면 아무것도 바꾸지 않고 이유를 보여 줍니다.
    - 판 번호: 오늘 날짜로 자동 부여 (같은 날 두 번째면 `2026.10.28.2`)
    - 변경 내역: GitHub에 올라가 있는 지난 판과 비교해 추가·삭제·변경 항목을 `CHANGELOG.md` 맨 위에 적습니다.
@@ -39,7 +39,7 @@ https://raw.githubusercontent.com/Ohgeez-hub/Pumsemdata/main/data/pyojunpumsem.j
    Summary 에 내용(예: `2027년 품셈 반영`)을 적은 뒤 **Commit to main → Push origin**.
 
 Push 하면 GitHub가 자동으로 형식·검사값을 다시 확인합니다(Actions 탭의 `품셈 자료 검사`).
-`자료갱신.bat` 을 빼먹고 자료만 올리면 여기서 빨간 X 로 알려 주고, 적산도우미도 검사값이 맞지 않는 자료는 받지 않습니다.
+`자료갱신.bat` 을 빼먹고 자료만 올리면 여기서 빨간 X 로 알려 주고, JS헬퍼도 검사값이 맞지 않는 자료는 받지 않습니다.
 
 ## 폴더 구성
 
