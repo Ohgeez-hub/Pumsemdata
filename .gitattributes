@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# 품셈 자료는 한 바이트도 바뀌면 안 된다(manifest 의 SHA-256 검사값과 맞아야 함)
+data/*.json -text

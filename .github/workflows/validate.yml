@@ -1,0 +1,23 @@
+# 자료·manifest·도구가 바뀔 때마다 형식과 검사값을 확인한다.
+# 실패하면 GitHub 화면에 빨간 X 가 표시되고, Pull Request 는 Merge 전에 문제를 볼 수 있다.
+name: 품셈 자료 검사
+
+on:
+  push:
+    paths: ["data/**", "manifest.json", "tools/**", ".github/workflows/validate.yml"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 형식·manifest 검사
+        run: python tools/pumsem_check.py

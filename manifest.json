@@ -1,0 +1,31 @@
+{
+  "format": "jeoksan-pumsem-manifest",
+  "schema": 1,
+  "name": "건설공사 표준품셈",
+  "edition": "2026",
+  "version": "2026.10.27",
+  "updated": "2026-10-27",
+  "source": {
+    "url": "https://gitlab.aigov.go.kr/archimin/pumsem",
+    "file": "pyojunpumsem.json",
+    "branch": "main",
+    "fetched": "2026-10-27T17:09:00+09:00",
+    "note": "GitLab 에서 zip 으로 내려받아 처음 등록"
+  },
+  "files": [
+    {
+      "path": "data/pyojunpumsem.json",
+      "sha256": "8c5f1bafc3d83e9b9b296530f12c5e767b038f5bc4d0b7899219ab6b316e0cfd",
+      "bytes": 4046806,
+      "entries": 1092,
+      "tables": 2328,
+      "divisions": {
+        "공통부문": 321,
+        "토목부문": 233,
+        "건축부문": 162,
+        "기계설비부문": 241,
+        "유지관리부문": 135
+      }
+    }
+  ]
+}
