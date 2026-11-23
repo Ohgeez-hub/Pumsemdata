@@ -8,7 +8,7 @@
 
 검사 내용
   - JSON 목록이고 항목마다 b, cn, ct, sc, st, ic, it, pg, bl, tx 가 알맞은 형식인지
-  - bl 블록이 문단(p) 또는 표(table, 행 = 문자열 목록)인지
+  - bl 블록이 문단(p) 또는 표(table, 행 = 문자열 목록)인지. 표의 병합 셀 spans(선택)가 표 안에 있고 겹치지 않는지
   - 항목 수가 너무 적지 않은지(잘린 파일 방지), 같은 (부문, 항목 번호) 중복
   - manifest.json 의 SHA-256·크기·항목 수가 실제 파일과 같은지
 """
@@ -45,6 +45,27 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def span_errors(rows, spans) -> list[str]:
+    """표 병합 셀 spans = [[행, 열, 행 수, 열 수], ...] (0부터): 표 안에 있고 서로 겹치지 않는지."""
+    if not isinstance(spans, list):
+        return ["spans 가 목록이 아님"]
+    out, used = [], set()
+    ncol = max((len(r) for r in rows), default=0)
+    for s in spans:
+        if not (isinstance(s, list) and len(s) == 4 and all(isinstance(v, int) and not isinstance(v, bool) for v in s)):
+            out.append(f"spans 항목 {s!r} 이 정수 4개가 아님")
+            continue
+        r, c, nr, nc = s
+        if r < 0 or c < 0 or nr < 1 or nc < 1 or nr * nc < 2 or r + nr > len(rows) or c + nc > ncol:
+            out.append(f"spans 항목 {s} 이 표 밖이거나 크기가 잘못됨")
+            continue
+        cells = {(i, j) for i in range(r, r + nr) for j in range(c, c + nc)}
+        if cells & used:
+            out.append(f"spans 항목 {s} 이 다른 병합과 겹침")
+        used |= cells
+    return out
+
+
 def check_entries(entries) -> list[str]:
     """형식 오류가 있으면 CheckError, 경고는 목록으로 돌려준다."""
     if not isinstance(entries, list):
@@ -74,6 +95,8 @@ def check_entries(entries) -> list[str]:
                 if not isinstance(rows, list) or not all(isinstance(r, list) and all(isinstance(c, str) for c in r)
                                                          for r in rows):
                     errors.append(f"{where}: 표 블록 {j} 의 rows 가 문자열 목록의 목록이 아님")
+                elif "spans" in b:
+                    errors += [f"{where}: 표 블록 {j} 의 {m}" for m in span_errors(rows, b["spans"])]
         if e.get("b") not in KNOWN_DIVISIONS:
             warnings.append(f"{where}: 처음 보는 부문 '{e.get('b')}'")
         key = (e.get("b"), e.get("ic"))

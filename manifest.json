@@ -3,7 +3,7 @@
   "schema": 1,
   "name": "건설공사 표준품셈",
   "edition": "2026",
-  "version": "2026.10.28",
+  "version": "2026.10.28.2",
   "updated": "2026-10-28",
   "source": {
     "origin": "https://gitlab.aigov.go.kr/archimin/pumsem",
@@ -12,8 +12,8 @@
   "files": [
     {
       "path": "data/pyojunpumsem.json",
-      "sha256": "e964458c0583d4e99d7497e2d57bd0f4a19b02a6184dfd092a6b7038f2fb5a0f",
-      "bytes": 4050819,
+      "sha256": "65c86f25e2d1d9a898e2dff865535fe92866326d214b267c0f138d517dfa0665",
+      "bytes": 4050818,
       "entries": 1096,
       "tables": 2329,
       "divisions": {
